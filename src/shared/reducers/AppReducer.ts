@@ -1,4 +1,4 @@
-import { StateType, ActionType } from '@Shared/types';
+import { StateType, ActionType } from '@Shared/types/reducer';
 
 const createInitialState = (initialState: Array<string>): StateType => {
     return {

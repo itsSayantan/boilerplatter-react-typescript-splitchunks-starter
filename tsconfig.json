@@ -3,7 +3,8 @@
     // setting this to false, because webpack is already
     // invoking ts-loader to compile tsx
     "compilerOptions": {
-        "module": "commonjs",
+        "lib": ["es5", "es2015", "es2016", "dom"],
+        "module": "esnext",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,

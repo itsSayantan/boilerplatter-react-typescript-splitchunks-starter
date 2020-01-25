@@ -1,16 +1,13 @@
 const webpack = require('webpack');
-const path = require('path');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
+const AsyncChunkNames = require('webpack-async-chunk-names-plugin');
 
-const { copy } = require('./utils');
+const path = require('path');
 
 const REACT_BASE_PATH = '../src/';
 const REACT_DEV_SERVER_OUTPUT_PATH = path.resolve(__dirname, '../public/');
 const REACT_OUTPUT_PATH = path.resolve(__dirname, '../dist/');
 const REACT_OUTPUT_FILE_NAME = 'bundle.js';
-
-if (process.env.NODE_ENV === 'production') {
-    copy();
-}
 
 module.exports = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -35,7 +32,8 @@ module.exports = {
             process.env.NODE_ENV === 'production'
                 ? REACT_OUTPUT_PATH
                 : REACT_DEV_SERVER_OUTPUT_PATH,
-        filename: REACT_OUTPUT_FILE_NAME
+        filename: REACT_OUTPUT_FILE_NAME,
+        chunkFilename: '[name].js'
     },
     devServer: {
         contentBase: REACT_DEV_SERVER_OUTPUT_PATH,
@@ -44,6 +42,7 @@ module.exports = {
         compress: true,
         hot: true,
         writeToDisk: false,
+        historyApiFallback: true,
         overlay: {
             warnings: true,
             errors: true
@@ -67,5 +66,34 @@ module.exports = {
             }
         ]
     },
-    plugins: [new webpack.HotModuleReplacementPlugin()]
+    plugins: [
+        new HTMLWebpackPlugin({
+            template: REACT_DEV_SERVER_OUTPUT_PATH + '/index.html'
+        }),
+        new AsyncChunkNames(),
+        new webpack.HotModuleReplacementPlugin()
+    ],
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            minSize: 5000,
+            cacheGroups: {
+                vendor: {
+                    name: 'vendor',
+                    chunks: 'all',
+                    test: /node_modules/,
+                    priority: 20
+                },
+                // common chunk
+                common: {
+                    name: 'common',
+                    minChunks: 2,
+                    chunks: 'async',
+                    priority: 10,
+                    reuseExistingChunk: true,
+                    enforce: true
+                }
+            }
+        }
+    }
 };
